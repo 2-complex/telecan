@@ -1,3 +1,5 @@
 env/
-app/*.pyc
+*.pyc
 .DS_Store
+*.db
+

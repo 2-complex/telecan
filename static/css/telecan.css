@@ -1,0 +1,10 @@
+
+body {
+    background-color: #fff;
+}
+
+.panel {
+    background-color: #eee;
+    border: 1px solid #aaa;
+    margin: 10px;
+}

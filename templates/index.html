@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{%block title%}{%endblock%}
+{%block main_content%}
+
+<div id="masthead">
+    <h1>Telecan</h1>
+</div>
+
+<div id="users" class="user-list"></div>
+<div id="games" class="game-list"></div>
+<div id="rounds" class="round-list"></div>
+<div id="moves" class="move-list"></div>
+
+<div class="panel" id="new-user-form">
+    Name
+    <div>
+        <textarea id="new-username" class="form-input"></textarea>
+    </div>
+    Password
+    <div>
+        <textarea id="new-password" class="form-input"></textarea>
+    </div>
+    Email
+    <div>
+        <textarea id="new-email" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="new-user-button">NEW USER</button>
+    </div>
+</div>
+
+<div class="panel" id="delete-user">
+    User id
+    <div>
+        <textarea id="delete-user-id" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="delete-user-button">DELETE</button>
+    </div>
+</div>
+
+<div class="panel" id="new-game-form">
+    User (owner)
+    <div>
+        <textarea id="new-game-user" class="form-input"></textarea>
+    </div>
+    Title
+    <div>
+        <textarea id="new-game-title" class="form-input"></textarea>
+    </div>
+    Description
+    <div>
+        <textarea id="new-game-description" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="new-game-button">NEW GAME</button>
+    </div>
+</div>
+
+<div class="panel" id="delete-game-form">
+    Game id
+    <div>
+        <textarea id="delete-game-id" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="delete-game-button">DELETE GAME</button>
+    </div>
+</div>
+
+<div class="panel" id="new-round-form">
+    New Round of game:
+    <div>
+        <textarea id="new-round-game" class="form-input"></textarea>
+    </div>
+    User (owner)
+    <div>
+        <textarea id="new-round-user" class="form-input"></textarea>
+    </div>
+    Players
+    <div>
+        <textarea id="new-round-players" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="new-round-button">NEW ROUND</button>
+    </div>
+</div>
+
+<div class="panel" id="delete-round-form">
+    Round id
+    <div>
+        <textarea id="delete-round-id" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="delete-round-button">DELETE ROUND</button>
+    </div>
+</div>
+
+<div class="panel" id="new-move-form">
+    New Move in round:
+    <div>
+        <textarea id="new-move-round" class="form-input"></textarea>
+    </div>
+    User (owner)
+    <div>
+        <textarea id="new-move-user" class="form-input"></textarea>
+    </div>
+    Content
+    <div>
+        <textarea id="new-move-content" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="new-move-button">NEW MOVE</button>
+    </div>
+</div>
+
+
+<div id="output" class="output-text"></div>
+
+<script>
+function refresh()
+{
+    var thingsList = ["users", "games"];
+    for( var i = 0; i < thingsList.length; i++ )
+    {
+        var things = thingsList[i];
+
+        $("#"+things).empty();
+        $.when( $.ajax({ type: "GET", url: "/"+things, dataType: "text"}) )
+            .then(
+                function(result) {
+                    var response = JSON.parse(result);
+                    $("#"+things).append(result);
+                }
+            );
+    }
+}
+
+$( document ).ready(refresh);
+
+$('#new-user-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/new-user", dataType: "text",
+            data: {
+                "username":$("#new-username").val(),
+                "password":$("#new-password").val(),
+                "email":$("#new-email").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#delete-user-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/delete-user", dataType: "text",
+            data: {
+                "id":$("#delete-user-id").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#new-game-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/new-game", dataType: "text",
+            data: {
+                "user_id":$("#new-game-user").val(),
+                "title":$("#new-game-title").val(),
+                "description":$("#new-game-description").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+
+$('#delete-game-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/delete-game", dataType: "text",
+            data: {
+                "id":$("#delete-game-id").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#new-round-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/new-round", dataType: "text",
+            data: {
+                "game_id":$("#new-round-game").val(),
+                "user_id":$("#new-round-user").val(),
+                "players":$("#new-round-players").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#delete-round-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/delete-round", dataType: "text",
+            data: {
+                "id":$("#delete-round-id").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#new-move-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/new-move", dataType: "text",
+            data: {
+                "round_id":$("#new-move-round").val(),
+                "user_id":$("#new-move-user").val(),
+                "content":$("#new-move-content").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+</script>
+
+{%endblock%}
