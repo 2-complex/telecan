@@ -9,7 +9,7 @@ json blobs.
 from models import *
 import json
 import sqlalchemy
-
+import re
 
 def user_info(user):
     return {"username":user.username, "id":user.id}
@@ -33,6 +33,18 @@ def round_info(round):
 
 def move_info(move):
     return {"user_id":move.user_id, "index":move.index, "content":move.content}
+
+
+def valid_email(email):
+    return None != re.match("[a-zA-Z0-9_\.]+@[a-zA-Z0-9_\.]+$", email)
+
+
+def valid_username(username):
+    return username == username.strip() and None != re.match("[a-zA-Z0-9 _-]+", username)
+
+
+def capitalize(s):
+    return s[0].upper() + s[1:]
 
 
 class Implementation:
@@ -81,21 +93,38 @@ class Implementation:
         if len(list(self.models.User.query.filter_by(email=email))) > 0:
             return json.dumps({"success":False, "reason":"A user with this email already exists."})
 
+        if not valid_username(username):
+            return json.dumps({"success":False, "reason":"Username invalid."})
+
+        if not valid_email(email):
+            return json.dumps({"success":False, "reason":"Email address not in the form of an email address."})
+
         user = User(username, password, email)
         self.session.add(user)
         self.session.commit()
         return json.dumps({"success":True, "id":user.id})
 
 
-    def delete_user(self, delete_id):
-        users_matching = User.query.filter_by(id=int(delete_id))
-        map(self.session.delete, users_matching)
+    def delete_object(self, Class, name, delete_id):
+        matching = Class.query.filter_by(id=int(delete_id))
+        deleted_ids = map(lambda u: u.id, matching)
+        if not len(list(matching)):
+            return json.dumps({"success":False, "reason": capitalize(name) + " not found."})
+        map(self.session.delete, matching)
         self.session.commit()
-        return json.dumps({"users-deleted":map(lambda u: u.id, users_matching)})
+        return json.dumps({"success":True, "deleted":deleted_ids})
+
+
+    def delete_user(self, delete_id):
+        return self.delete_object(self.models.User, "User", delete_id)
 
 
     def new_game(self, user_id, title, description):
         user = self.get_user_by_id(user_id)
+
+        if user == None:
+            return json.dumps({"success":False, "reason":"User not found."})
+
         game = Game(user, title, description)
         self.session.add(game)
         self.session.commit()
@@ -103,15 +132,23 @@ class Implementation:
 
 
     def delete_game(self, delete_id):
-        games = Game.query.filter_by(id=delete_id)
-        rounds = Round.query.filter_by(game_id=delete_id)
+        games = list(Game.query.filter_by(id=delete_id))
+
+        if len(games) != 1:
+            return json.dumps({"success":False})
+
+        rounds = list(Round.query.filter_by(game_id=delete_id))
+
         moves = []
         for round in rounds:
-            moves += Move.query.filter_by(round_id=round.id)
+            moves += list( Move.query.filter_by(round_id=round.id) )
 
-        map(self.session.delete, games+rounds+moves)
+        deleted_ids = map(lambda g: g.id, games)
+
+        map(self.session.delete, games + rounds + moves)
         self.session.commit()
-        return json.dumps({"games-deleted":map(lambda g: g.id, games_matching)})
+
+        return json.dumps({"success":True, "deleted":deleted_ids})
 
 
     def new_round(self, user_id, game_id, player_ids):
@@ -127,16 +164,24 @@ class Implementation:
         self.session.add(round)
         self.session.commit()
 
-        return json.dumps({"success":True, "id":game.id})
+        return json.dumps({"success":True, "id":round.id})
 
 
     def delete_round(self, delete_id):
-        rounds = Round.query.filter_by(id=delete_id)
+        rounds = list(Round.query.filter_by(id=delete_id))
+        if len(rounds) != 1:
+            return json.dumps({"success" : False})
+
+        deleted_ids = map(lambda g: g.id, rounds)
+
+        moves = []
         for round in rounds:
-            moves = Move.query.filter_by(round_id=round.id)
+            moves += Move.query.filter_by(round_id=round.id)
+
         map(self.session.delete, rounds + moves)
+
         self.session.commit()
-        return json.dumps({"rounds-deleted":map(lambda g: g.id, rounds)})
+        return json.dumps({"success" : True, "deleted" : deleted_ids})
 
 
     def new_move(self, round_id, user_id, content):

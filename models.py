@@ -66,7 +66,7 @@ class Round(database.Model):
         self.game = game
 
     def __repr__(self):
-        return '<Round>'
+        return '<Round %s>'%str(self.id)
 
 
 class Move(database.Model):
