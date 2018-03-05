@@ -48,11 +48,18 @@ blob = json.loads(impl.new_user( "Jack the Ripper", "Jack123", "lessthanlightnin
 assert(blob['success'] == True)
 jack_id = blob['id']
 
+blob = json.loads(impl.delete_user("23gwgwe\n\n\n"))
+assert(blob['success'] == False)
+
+blob = json.loads(impl.delete_user("0"))
+assert(blob['success'] == False)
+
+
 blob = json.loads(impl.delete_user(jack_id))
 assert(blob['success'] == True)
 assert(blob['deleted']==[jack_id])
 
-blob = json.loads(impl.delete_user(jack_id))
+blob = json.loads(impl.delete_user(str(jack_id)))
 assert(blob['success'] == False)
 
 assert( sybil_id > 0 and humphrey_id > 0 and sybil_id != humphrey_id )
@@ -81,14 +88,24 @@ assert(blob['deleted']==[checkers_id])
 blob = json.loads(impl.delete_game(checkers_id))
 assert(not blob['success'])
 
-blob = json.loads( impl.new_round(sybil_id, chess_id, ','.join(map(str, [humphrey_id, sybil_id]) ) ) )
+blob = json.loads( impl.new_round(sybil_id, chess_id, ','.join(map(str, [humphrey_id, sybil_id]))) )
 assert(blob['success'] == True)
 chess_round_id = blob['id']
 print("chess_round_id = " + str(chess_round_id))
 
-blob = json.loads( impl.new_round(sybil_id, chess_id, ','.join(map(str, [humphrey_id]) ) ) )
+blob = json.loads( impl.new_round(sybil_id, chess_id, ','.join(map(str, [humphrey_id]))) )
 assert(blob['success'] == True)
 wrong_round_id = blob['id']
+
+blob = json.loads(impl.new_round(sybil_id, chess_id, "asdf"))
+assert(blob['success'] == False)
+
+blob = json.loads(impl.new_round(1000, chess_id, str(humphrey_id)))
+assert(blob['success'] == False)
+
+blob = json.loads(impl.new_round(sybil_id, 1000, str(humphrey_id)))
+assert(blob['success'] == False)
+
 
 blob = json.loads( impl.delete_round(wrong_round_id) )
 assert(blob['success'] == True)
@@ -115,6 +132,16 @@ assert( blob['moves'][2]['content'] == "You sunk my battleship" )
 print( blob['moves'][0]['content'] )
 print( blob['moves'][1]['content'] )
 print( blob['moves'][2]['content'] )
+
+assert( list(db.models.Game.query.all()) != [] )
+assert( list(db.models.Round.query.all()) != [] )
+assert( list(db.models.Move.query.all()) != [] )
+
+blob = json.loads( impl.delete_game(chess_id) )
+
+assert( list(db.models.Game.query.all()) == [] )
+assert( list(db.models.Round.query.all()) == [] )
+assert( list(db.models.Move.query.all()) == [] )
 
 print("PASS")
 

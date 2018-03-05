@@ -11,6 +11,7 @@ import json
 import sqlalchemy
 import re
 
+
 def user_info(user):
     return {"username":user.username, "id":user.id}
 
@@ -106,6 +107,9 @@ class Implementation:
 
 
     def delete_object(self, Class, name, delete_id):
+        if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
+            return json.dumps({"success":False, "reason":"id non-numerical"})
+
         matching = Class.query.filter_by(id=int(delete_id))
         deleted_ids = map(lambda u: u.id, matching)
         if not len(list(matching)):
@@ -132,6 +136,9 @@ class Implementation:
 
 
     def delete_game(self, delete_id):
+        if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
+            return json.dumps({"success":False, "reason":"id non-numerical"})
+
         games = list(Game.query.filter_by(id=delete_id))
 
         if len(games) != 1:
@@ -151,15 +158,39 @@ class Implementation:
         return json.dumps({"success":True, "deleted":deleted_ids})
 
 
-    def new_round(self, user_id, game_id, player_ids):
-        user = self.get_user_by_id(user_id)
-        game = self.get_game_by_id(game_id)
-        players = map(int, player_ids.split(','))
+    def new_round(self, user_id, game_id, player_id_string):
+        if type(user_id) in [str, unicode] and None == re.match("\d+$", user_id):
+            return json.dumps({"success":False, "reason":"User id non-numerical."})
+
+        if type(game_id) in [str, unicode] and None == re.match("\d+$", game_id):
+            return json.dumps({"success":False, "reason":"Game id non-numerical."})
+
+        user = self.get_user_by_id(int(user_id))
+        game = self.get_game_by_id(int(game_id))
+
+        if user == None:
+            return json.dumps({"success":False, "reason":"User id invalid."})
+
+        if game == None:
+            return json.dumps({"success":False, "reason":"Game id invalid."})
+
+        player_ids = map(int, [m.string[m.span()[0]:m.span()[1]] for m in re.finditer("\d+", player_id_string)])
+
+        if len(player_ids) == 0:
+            return json.dumps({"success":False, "reason":"Player ids invalid."})
+
+        players = []
+        for player_id in map(int, player_ids):
+            if player_id == 0:
+                return json.dumps({"success":False, "reason":"Player id 0"})
+            player = self.get_user_by_id(player_id)
+            if player == None:
+                return json.dumps({"success":False, "reason":"Player not found: " + str(player_id)})
+            players.append( player )
 
         round = Round(user, game)
-
-        for player in map(self.get_user_by_id, players):
-            round.players.append( player )
+        for player in players:
+            round.players.append(player)
 
         self.session.add(round)
         self.session.commit()
@@ -168,6 +199,9 @@ class Implementation:
 
 
     def delete_round(self, delete_id):
+        if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
+            return json.dumps({"success":False, "reason":"id non-numerical"})
+
         rounds = list(Round.query.filter_by(id=delete_id))
         if len(rounds) != 1:
             return json.dumps({"success" : False})

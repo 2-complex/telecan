@@ -49,6 +49,9 @@ def r_new_user():
 
 @app.route('/delete-user', methods=['POST'])
 def r_delete_user():
+    print( "ho ho ho" )
+    print( "request.form[id] = " + repr(request.form['id']) )
+
     return impl.delete_user(
         delete_id = request.form['id'])
 
