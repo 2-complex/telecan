@@ -6,7 +6,6 @@ These functions interact with the database and return
 json blobs.
 '''
 
-from models import *
 import json
 import sqlalchemy
 import re
@@ -100,7 +99,7 @@ class Implementation:
         if not valid_email(email):
             return json.dumps({"success":False, "reason":"Email address not in the form of an email address."})
 
-        user = User(username, password, email)
+        user = self.models.User(username, password, email)
         self.session.add(user)
         self.session.commit()
         return json.dumps({"success":True, "id":user.id})
@@ -108,7 +107,7 @@ class Implementation:
 
     def delete_object(self, Class, name, delete_id):
         if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
-            return json.dumps({"success":False, "reason":"id non-numerical"})
+            return json.dumps({"success":False, "reason":"User id non-numerical"})
 
         matching = Class.query.filter_by(id=int(delete_id))
         deleted_ids = map(lambda u: u.id, matching)
@@ -129,7 +128,7 @@ class Implementation:
         if user == None:
             return json.dumps({"success":False, "reason":"User not found."})
 
-        game = Game(user, title, description)
+        game = self.models.Game(user, title, description)
         self.session.add(game)
         self.session.commit()
         return json.dumps({"success":True, "id":game.id})
@@ -139,16 +138,16 @@ class Implementation:
         if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
             return json.dumps({"success":False, "reason":"id non-numerical"})
 
-        games = list(Game.query.filter_by(id=delete_id))
+        games = list(self.models.Game.query.filter_by(id=delete_id))
 
         if len(games) != 1:
             return json.dumps({"success":False})
 
-        rounds = list(Round.query.filter_by(game_id=delete_id))
+        rounds = list(self.models.Round.query.filter_by(game_id=delete_id))
 
         moves = []
         for round in rounds:
-            moves += list( Move.query.filter_by(round_id=round.id) )
+            moves += list( self.models.Move.query.filter_by(round_id=round.id) )
 
         deleted_ids = map(lambda g: g.id, games)
 
@@ -188,7 +187,7 @@ class Implementation:
                 return json.dumps({"success":False, "reason":"Player not found: " + str(player_id)})
             players.append( player )
 
-        round = Round(user, game)
+        round = self.models.Round(user, game)
         for player in players:
             round.players.append(player)
 
@@ -202,16 +201,13 @@ class Implementation:
         if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
             return json.dumps({"success":False, "reason":"id non-numerical"})
 
-        rounds = list(Round.query.filter_by(id=delete_id))
+        rounds = list(self.models.Round.query.filter_by(id=delete_id))
         if len(rounds) != 1:
             return json.dumps({"success" : False})
 
+        round = rounds[0]
         deleted_ids = map(lambda g: g.id, rounds)
-
-        moves = []
-        for round in rounds:
-            moves += Move.query.filter_by(round_id=round.id)
-
+        moves = list(self.models.Move.query.filter_by(round_id=round.id))
         map(self.session.delete, rounds + moves)
 
         self.session.commit()
@@ -221,7 +217,7 @@ class Implementation:
     def new_move(self, round_id, user_id, content):
         user = self.get_user_by_id(user_id)
         round = self.get_round_by_id(round_id)
-        move = Move(round, user, content)
+        move = self.models.Move(round, user, content)
         self.session.add(move)
         self.session.commit()
         return json.dumps({"success":True, "id":move.id})
