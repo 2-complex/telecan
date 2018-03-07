@@ -90,3 +90,4 @@ def r_new_move():
         round_id = request.form['round_id'],
         user_id = request.form['user_id'],
         content = request.form['content'])
+

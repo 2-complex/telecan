@@ -105,21 +105,17 @@ class Implementation:
         return json.dumps({"success":True, "id":user.id})
 
 
-    def delete_object(self, Class, name, delete_id):
+    def delete_user(self, delete_id):
         if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
             return json.dumps({"success":False, "reason":"User id non-numerical"})
 
-        matching = Class.query.filter_by(id=int(delete_id))
+        matching = self.models.User.query.filter_by(id=int(delete_id))
         deleted_ids = map(lambda u: u.id, matching)
         if not len(list(matching)):
-            return json.dumps({"success":False, "reason": capitalize(name) + " not found."})
+            return json.dumps({"success":False, "reason": "User not found."})
         map(self.session.delete, matching)
         self.session.commit()
         return json.dumps({"success":True, "deleted":deleted_ids})
-
-
-    def delete_user(self, delete_id):
-        return self.delete_object(self.models.User, "User", delete_id)
 
 
     def new_game(self, user_id, title, description):

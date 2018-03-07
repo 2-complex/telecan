@@ -5,6 +5,7 @@ import database
 import update_database
 import os
 
+
 if os.path.isfile("temp.db"):
     os.remove("temp.db")
 
