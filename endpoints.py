@@ -75,7 +75,7 @@ def r_new_round():
     return impl.new_round(
         user_id = request.form['user_id'],
         game_id = request.form['game_id'],
-        player_ids = request.form['players'])
+        player_id_string = request.form['players'])
 
 
 @app.route('/delete-round', methods=['POST'])
