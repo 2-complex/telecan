@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{%block title%}{%endblock%}
+{%block main_content%}
+
+<div id="masthead">
+    <h1>Telecan</h1>
+</div>
+
+<div id="games" class="game-list"></div>
+<div id="rounds" class="round-list"></div>
+
+<script>
+function refresh()
+{
+    $("#games").empty();
+    $.when( $.ajax({
+        type: "GET",
+        url: "/games",
+        dataType: "text",
+        data: {"username":"{{username | safe}}",},
+    })).then(
+        function(result) {
+            var response = JSON.parse(result);
+
+            if( response.games )
+            {
+                for( var i = 0; i < response.games.length; ++i )
+                {
+                    var game = response.games[i];
+
+                    $("#games").append(
+                        $("<div>").append( game.title )
+                    );
+                }
+            }
+        }
+    ).fail(
+        function() {
+           $("#games").append("Games not found");
+        }
+    );
+}
+
+$(document).ready(refresh);
+</script>
+
+{%endblock%}

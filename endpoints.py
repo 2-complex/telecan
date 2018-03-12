@@ -15,18 +15,30 @@ impl = implementation.Implementation(db.models, db.session)
 
 
 @app.route('/')
-def index():
+def r_index():
     return render_template('index.html')
 
 
+@app.route('/<username>', methods=['GET'])
+def r_home(username):
+    return render_template(
+        'home.html',
+        username = username)
+
+
 @app.route('/users', methods=['GET'])
-def users():
+def r_users():
     return impl.users()
 
 
 @app.route('/games', methods=['GET'])
-def games():
-    return impl.games()
+def r_games():
+    criteria = {}
+    if request.values.has_key("username"):
+        criteria["username"] = request.values["username"]
+
+    print(criteria)
+    return impl.games(criteria)
 
 
 @app.route('/rounds', methods=['GET'])
@@ -47,11 +59,13 @@ def r_new_user():
         email = request.form['email'])
 
 
+@app.route('/sign-in', methods=['GET'])
+def r_sign_in():
+    return impl.sign_in()
+
+
 @app.route('/delete-user', methods=['POST'])
 def r_delete_user():
-    print( "ho ho ho" )
-    print( "request.form[id] = " + repr(request.form['id']) )
-
     return impl.delete_user(
         delete_id = request.form['id'])
 

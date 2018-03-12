@@ -11,6 +11,12 @@ import sqlalchemy
 import re
 
 
+def merge(dictA, dictB):
+    result = dictA.copy()
+    result.update(dictB)
+    return result
+
+
 def user_info(user):
     return {"username":user.username, "id":user.id}
 
@@ -43,6 +49,10 @@ def valid_username(username):
     return username == username.strip() and None != re.match("[a-zA-Z0-9 _-]+", username)
 
 
+def get_token_for_user(user):
+    return hashlib.sha512(user.password).hexdigest()
+
+
 def capitalize(s):
     return s[0].upper() + s[1:]
 
@@ -52,6 +62,10 @@ class Implementation:
     def __init__(self, models, session):
         self.models = models
         self.session = session
+
+
+    def get_user_by_name(self, username):
+        return self.models.User.query.filter_by(username=username).first()
 
 
     def get_game_by_id(self, game_id):
@@ -71,9 +85,17 @@ class Implementation:
         return json.dumps({"users":map(user_info, users)})
 
 
-    def games(self):
+    def games(self, criteria):
+        user = None
+        if criteria.has_key("username"):
+            user = self.get_user_by_name(criteria["username"])
+            if user == None:
+                return '{"success" : false}'
+            games = self.models.Game.query.filter_by(user_id=user.id)
+            return json.dumps({"games":map(game_info, games)})
+
         games = self.models.Game.query.all()
-        return json.dumps({"games":map(game_info, games)})
+        return json.dumps(merge( criteria, {"games":map(game_info, games)} ))
 
 
     def rounds(self):

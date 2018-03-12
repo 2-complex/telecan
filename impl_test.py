@@ -1,8 +1,6 @@
-
 import implementation
 import json
 import database
-import update_database
 import os
 
 
@@ -71,6 +69,10 @@ print( "sybil_id = " + str(sybil_id) )
 blob = json.loads( impl.new_game(humphrey_id, "Chess", "A Musical from the 80s") )
 assert(blob['success'] == True)
 chess_id = blob['id']
+
+blob = json.loads( impl.games({"username":"Sir Humphrey Applegate"}) )
+assert(len(blob['games']) == 1)
+assert(blob['games'][0]['title'] == u"Chess")
 
 blob = json.loads( impl.new_game(sybil_id, "Checkers", "Dog given to Nixon as bribe") )
 assert(blob['success'] == True)

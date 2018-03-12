@@ -15,7 +15,6 @@ class Database():
 
         Model.query = session.query_property()
 
-        # import all modules here that define models.
         import models
         Model.metadata.create_all(bind=engine)
 
