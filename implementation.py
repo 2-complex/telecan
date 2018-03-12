@@ -98,7 +98,12 @@ class Implementation:
         return json.dumps(merge( criteria, {"games":map(game_info, games)} ))
 
 
-    def rounds(self):
+    def rounds(self, criteria):
+        game = None
+        if criteria.has_key("game_id"):
+            rounds = self.models.Round.query.filter_by(game_id=criteria["game_id"])
+            return json.dumps({"rounds":map(round_info, rounds)})
+
         rounds = self.models.Round.query.all()
         return json.dumps({"rounds":map(round_info, rounds)})
 
