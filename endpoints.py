@@ -37,7 +37,6 @@ def r_games():
     if request.values.has_key("username"):
         criteria["username"] = request.values["username"]
 
-    print(criteria)
     return impl.games(criteria)
 
 

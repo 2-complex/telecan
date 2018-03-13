@@ -34,7 +34,7 @@ function fetchGameRounds(game_id, $rounds)
         {
             populateRounds(
                 JSON.parse(result),
-                $("#games").append($("<div>"))
+                $rounds
             );
         }
     ).fail(
@@ -45,20 +45,25 @@ function fetchGameRounds(game_id, $rounds)
     );
 }
 
-function populateGames(gameInfo)
+function populateGames(gamesInfo)
 {
-    if( gameInfo.games )
+    if( gamesInfo.games )
     {
-        for( var i = 0; i < gameInfo.games.length; ++i )
+        for( var i = 0; i < gamesInfo.games.length; ++i )
         {
-            var game = gameInfo.games[i];
-            $("#games").append(
-                $("<div>").append( game.title ).click(
-                    function(evt)
-                    {
-                        fetchGameRounds(game.id);
-                    }
-                )
+            var gameInfo = gamesInfo.games[i];
+            var $game = $("<div>");
+
+            $("#games").append($game);
+            $game.append( gameInfo.title );
+            $game.click(
+                function(evt)
+                {
+                    $game.find(".tc-rounds").remove();
+                    var $rounds = $("<div>").addClass("tc-rounds");
+                    $game.append($rounds);
+                    fetchGameRounds(gameInfo.id, $rounds);
+                }
             );
         }
     }
@@ -74,7 +79,7 @@ function fetchGames()
     })).then(
         function(result)
         {
-            populateGames(JSON.parse(result))
+            populateGames(JSON.parse(result));
         }
     ).fail(
         function()
