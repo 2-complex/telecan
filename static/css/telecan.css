@@ -4,8 +4,8 @@ body {
 }
 
 .panel {
-    background-color: #eee;
-    border: 1px solid #aaa;
+    background-color: #ddd;
+    border: 1px solid #333;
     margin: 5px;
 }
 
@@ -14,23 +14,29 @@ body {
 }
 
 .tc-expander {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     cursor:pointer;
 }
 
 .tc-games {
-    background-color: #eee;
-    border: 1px solid #aaa;
+    background-color: #ddd;
+    border: 1px solid #333;
     margin: 5px;
 }
 
 .tc-rounds {
-    background-color: #eee;
-    border: 1px solid #aaa;
+    background-color: #ddd;
+    border: 1px solid #333;
     margin: 5px;
 }
 
 .tc-moves {
-    background-color: #eee;
-    border: 1px solid #aaa;
+    background-color: #fff;
+    border: 0px solid #ddd;
     margin: 5px;
 }
