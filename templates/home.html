@@ -6,7 +6,7 @@
     <h1>Telecan</h1>
 </div>
 
-<div id="games" class="game-list"></div>
+<div id="games" class="tc-games"></div>
 
 <script>
 
@@ -46,15 +46,24 @@ function fetchRoundMoves(round_id, $moves)
     );
 }
 
-function connectRoundClickHandler($round, roundId)
+function connectRoundClickHandler($round, roundId, $link)
 {
-    $round.click(
+    $link.addClass("tc-expander");
+    $link.click(
         function(evt)
         {
-            $round.find(".tc-moves").remove();
-            var $moves = $("<div>").addClass("tc-moves");
-            $round.append($moves);
-            fetchRoundMoves(roundId, $moves);
+            if( $round.hasClass("tc-expanded") )
+            {
+                $round.find(".tc-moves").remove();
+                $round.removeClass("tc-expanded")
+            }
+            else
+            {
+                var $moves = $("<div>").addClass("tc-moves");
+                $round.append($moves);
+                fetchRoundMoves(roundId, $moves);
+                $round.addClass("tc-expanded")
+            }
         }
     );
 }
@@ -67,19 +76,22 @@ function populateRounds(roundsInfo, $rounds)
         {
             var roundInfo = roundsInfo.rounds[i];
             var $round = $("<div>");
-            var $idspan = $("<span>");
+            var $idspan = $("<span>").addClass("tc-section-title");
             $idspan.text(roundInfo.id);
-            $round.append($idspan);
+            var $title = $("<div>");
+            $title.append($idspan);
+            $round.append($title);
 
             for( var i = 0; i < roundInfo.players.length; ++i )
             {
                 var $namespan = $("<span>");
+                $namespan.addClass("tc-section-title");
                 $namespan.text(roundInfo.players[i].username);
-                $round.append($namespan);
+                $title.append($namespan);
             }
             $rounds.append($round);
 
-            connectRoundClickHandler($round, roundInfo.id);
+            connectRoundClickHandler($round, roundInfo.id, $title);
         }
     }
 }
@@ -109,13 +121,22 @@ function fetchGameRounds(game_id, $rounds)
 
 function connectGameClickHandler($game, gameId, $link)
 {
+    $link.addClass("tc-expander");
     $link.click(
         function(evt)
         {
-            $game.find(".tc-rounds").remove();
-            var $rounds = $("<div>").addClass("tc-rounds");
-            $game.append($rounds);
-            fetchGameRounds(gameId, $rounds);
+            if( $game.hasClass("tc-expanded") )
+            {
+                $game.find(".tc-rounds").remove();
+                $game.removeClass("tc-expanded");
+            }
+            else
+            {
+                var $rounds = $("<div>").addClass("tc-rounds");
+                $game.append($rounds);
+                fetchGameRounds(gameId, $rounds);
+                $game.addClass("tc-expanded");
+            }
         }
     );
 }
@@ -128,7 +149,8 @@ function populateGames(gamesInfo)
         {
             var gameInfo = gamesInfo.games[i];
             var $game = $("<div>");
-            var $title = $("<div>");
+            var $title = $("<span>");
+            $title.addClass("tc-section-title")
             $title.text(gameInfo.title);
             $game.append( $title );
             $("#games").append($game);
