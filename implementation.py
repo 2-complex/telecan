@@ -161,6 +161,9 @@ class Implementation:
         if user == None:
             return json.dumps({"success":False, "reason":"User not found."})
 
+        if len(list(self.models.Game.query.filter_by(user=user, title=title))) > 0:
+            return json.dumps({"success":False, "reason":"Duplicate game name " + str(title)})
+
         game = self.models.Game(user, title, description)
         self.session.add(game)
         self.session.commit()

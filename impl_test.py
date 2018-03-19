@@ -70,6 +70,9 @@ blob = json.loads( impl.new_game(humphrey_id, "Chess", "A Musical from the 80s")
 assert(blob['success'] == True)
 chess_id = blob['id']
 
+blob = json.loads( impl.new_game(humphrey_id, "Chess", "A DIFFERENT Musical with the same name from the 80s") )
+assert(blob['success'] == False)
+
 blob = json.loads( impl.games({"username":"Sir Humphrey Applegate"}) )
 assert(len(blob['games']) == 1)
 assert(blob['games'][0]['title'] == u"Chess")
