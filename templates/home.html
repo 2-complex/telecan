@@ -10,14 +10,76 @@
 
 <script>
 
-function populateRounds(roundInfo, $rounds)
+function populateMoves(movesInfo, $moves)
 {
-    if( roundInfo.rounds )
+    if( movesInfo.moves )
     {
-        for( var i = 0; i < roundInfo.rounds.length; ++i )
+        for( var i = 0; i < movesInfo.moves.length; ++i )
         {
-            var round = roundInfo.rounds[i];
-            $rounds.append(round.id);
+            var moveInfo = movesInfo.moves[i];
+            var $move = $("<div>");
+            var $content = $("<div>");
+            $content.text(moveInfo.content);
+            $move.append($content);
+            $moves.append($move);
+        }
+    }
+}
+
+function fetchRoundMoves(round_id, $moves)
+{
+    $.when( $.ajax({
+        type: "GET",
+        url: "/moves",
+        dataType: "text",
+        data: {"round_id":round_id,},
+    })).then(
+        function(result)
+        {
+            populateMoves(JSON.parse(result), $moves);
+        }
+    ).fail(
+        function()
+        {
+           $moves.append("Moves not found");
+        }
+    );
+}
+
+function connectRoundClickHandler($round, roundId)
+{
+    $round.click(
+        function(evt)
+        {
+            $round.find(".tc-moves").remove();
+            var $moves = $("<div>").addClass("tc-moves");
+            $round.append($moves);
+            fetchRoundMoves(roundId, $moves);
+        }
+    );
+}
+
+function populateRounds(roundsInfo, $rounds)
+{
+    if( roundsInfo.rounds )
+    {
+        for( var i = 0; i < roundsInfo.rounds.length; ++i )
+        {
+            var roundInfo = roundsInfo.rounds[i];
+            var $round = $("<div>");
+            var $idspan = $("<span>");
+            $idspan.text(roundInfo.id);
+            $round.append($idspan);
+
+            for( var i = 0; i < roundInfo.players.length; ++i )
+            {
+                var $namespan = $("<span>");
+                $namespan.text(roundInfo.players[i].username);
+                $round.append($namespan);
+            }
+            $rounds.append($round);
+
+            connectRoundClickHandler($round, roundInfo.id);
         }
     }
 }
@@ -40,7 +102,20 @@ function fetchGameRounds(game_id, $rounds)
     ).fail(
         function()
         {
-           $("#games").append("Rounds not found");
+           $rounds.append("Rounds not found");
+        }
+    );
+}
+
+function connectGameClickHandler($game, gameId, $link)
+{
+    $link.click(
+        function(evt)
+        {
+            $game.find(".tc-rounds").remove();
+            var $rounds = $("<div>").addClass("tc-rounds");
+            $game.append($rounds);
+            fetchGameRounds(gameId, $rounds);
         }
     );
 }
@@ -53,18 +128,12 @@ function populateGames(gamesInfo)
         {
             var gameInfo = gamesInfo.games[i];
             var $game = $("<div>");
-
+            var $title = $("<div>");
+            $title.text(gameInfo.title);
+            $game.append( $title );
             $("#games").append($game);
-            $game.append( gameInfo.title );
-            $game.click(
-                function(evt)
-                {
-                    $game.find(".tc-rounds").remove();
-                    var $rounds = $("<div>").addClass("tc-rounds");
-                    $game.append($rounds);
-                    fetchGameRounds(gameInfo.id, $rounds);
-                }
-            );
+
+            connectGameClickHandler($game, gameInfo.id, $title);
         }
     }
 }

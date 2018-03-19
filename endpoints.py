@@ -51,7 +51,11 @@ def r_rounds():
 
 @app.route('/moves', methods=['GET'])
 def r_moves():
-    return impl.moves()
+    criteria = {}
+    if request.values.has_key("round_id"):
+        criteria["round_id"] = request.values["round_id"]
+
+    return impl.moves(criteria)
 
 
 @app.route('/new-user', methods=['POST'])

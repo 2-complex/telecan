@@ -131,7 +131,7 @@ assert(blob['success'] == True)
 blob = json.loads( impl.new_move(chess_round_id, sybil_id, "You sunk my battleship") )
 assert(blob['success'] == True)
 
-blob = json.loads( impl.moves(chess_round_id) )
+blob = json.loads( impl.moves({"round_id":chess_round_id}) )
 assert( blob['moves'][0]['content'] == "Knight to C3" )
 assert( blob['moves'][1]['content'] == "Pawn to J4" )
 assert( blob['moves'][2]['content'] == "You sunk my battleship" )

@@ -29,12 +29,17 @@ def get_id(obj):
     return obj.id
 
 
+def get_name(obj):
+    return obj.name
+
+
 def round_info(round):
     return {
         "id":round.id,
         "game_id":round.game_id,
         "user_id":round.user_id,
-        "players":map(get_id, round.players)}
+        "players":map(user_info, round.players)
+    }
 
 
 def move_info(move):
@@ -108,7 +113,12 @@ class Implementation:
         return json.dumps({"rounds":map(round_info, rounds)})
 
 
-    def moves(self, round_id):
+    def moves(self, criteria):
+        round = None
+        if criteria.has_key("round_id"):
+            moves = self.models.Move.query.filter_by(round_id=criteria["round_id"])
+            return json.dumps({"moves":map(move_info, moves)})
+
         moves = self.models.Move.query.filter_by(round_id=round_id)
         return json.dumps({"moves":map(move_info, moves)})
 
