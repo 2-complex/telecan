@@ -9,6 +9,7 @@ json blobs.
 import json
 import sqlalchemy
 import re
+import hashlib
 
 
 def merge(dictA, dictB):
@@ -54,8 +55,10 @@ def valid_username(username):
     return username == username.strip() and None != re.match("[a-zA-Z0-9 _-]+", username)
 
 
-def get_token_for_user(user):
-    return hashlib.sha512(user.password).hexdigest()
+def salt(password):
+    return hashlib.sha256("bananas1312"
+        + password
+        + "apples132424").hexdigest()
 
 
 def capitalize(s):
@@ -136,7 +139,7 @@ class Implementation:
         if not valid_email(email):
             return json.dumps({"success":False, "reason":"Email address not in the form of an email address."})
 
-        user = self.models.User(username, password, email)
+        user = self.models.User(username, salt(password), email)
         self.session.add(user)
         self.session.commit()
         return json.dumps({"success":True, "id":user.id})
