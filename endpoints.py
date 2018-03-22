@@ -43,7 +43,11 @@ def r_games():
 
 @app.route('/rounds', methods=['GET'])
 def r_rounds():
-    return impl.rounds()
+    criteria = {}
+    if request.values.has_key("game_id"):
+        criteria["game_id"] = request.values["game_id"]
+
+    return impl.rounds(criteria)
 
 
 @app.route('/moves', methods=['GET'])

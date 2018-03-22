@@ -96,6 +96,10 @@ assert(blob['success'] == True)
 chess_round_id = blob['id']
 print("chess_round_id = " + str(chess_round_id))
 
+blob = json.loads( impl.rounds({"game_id":chess_id}) )
+assert(len(blob['rounds']) == 1)
+assert(blob['rounds'][0]['game_id'] == chess_id)
+
 blob = json.loads( impl.new_round(sybil_id, chess_id, ','.join(map(str, [humphrey_id]))) )
 assert(blob['success'] == True)
 wrong_round_id = blob['id']

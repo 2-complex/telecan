@@ -7,38 +7,87 @@
 </div>
 
 <div id="games" class="game-list"></div>
-<div id="rounds" class="round-list"></div>
 
 <script>
-function refresh()
+
+function populateRounds(roundInfo, $rounds)
 {
-    $("#games").empty();
+    if( roundInfo.rounds )
+    {
+        for( var i = 0; i < roundInfo.rounds.length; ++i )
+        {
+            var round = roundInfo.rounds[i];
+            $rounds.append(round.id);
+        }
+    }
+}
+
+function fetchGameRounds(game_id, $rounds)
+{
+    $.when( $.ajax({
+        type: "GET",
+        url: "/rounds",
+        dataType: "text",
+        data: {"game_id":game_id,},
+    })).then(
+        function(result)
+        {
+            populateRounds(
+                JSON.parse(result),
+                $("#games").append($("<div>"))
+            );
+        }
+    ).fail(
+        function()
+        {
+           $("#games").append("Rounds not found");
+        }
+    );
+}
+
+function populateGames(gameInfo)
+{
+    if( gameInfo.games )
+    {
+        for( var i = 0; i < gameInfo.games.length; ++i )
+        {
+            var game = gameInfo.games[i];
+            $("#games").append(
+                $("<div>").append( game.title ).click(
+                    function(evt)
+                    {
+                        fetchGameRounds(game.id);
+                    }
+                )
+            );
+        }
+    }
+}
+
+function fetchGames()
+{
     $.when( $.ajax({
         type: "GET",
         url: "/games",
         dataType: "text",
         data: {"username":"{{username | safe}}",},
     })).then(
-        function(result) {
-            var response = JSON.parse(result);
-
-            if( response.games )
-            {
-                for( var i = 0; i < response.games.length; ++i )
-                {
-                    var game = response.games[i];
-
-                    $("#games").append(
-                        $("<div>").append( game.title )
-                    );
-                }
-            }
+        function(result)
+        {
+            populateGames(JSON.parse(result))
         }
     ).fail(
-        function() {
+        function()
+        {
            $("#games").append("Games not found");
         }
     );
+}
+
+function refresh()
+{
+    $("#games").empty();
+    fetchGames();
 }
 
 $(document).ready(refresh);
