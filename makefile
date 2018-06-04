@@ -6,7 +6,6 @@ SERVER_DEPS = \
 	models.py \
 	database.py
 
-
 venv:
 	virtualenv venv
 
@@ -14,11 +13,11 @@ run: $(SERVER_DEPS)
 	venv/bin/python update_database.py testing.db
 	venv/bin/python run.py
 
-packages: venv requirements.txt
-	venv/bin/pip install -r requirements.txt
+pip:
+	python get-pip.py
 
-requirements.txt:
-	venv/bin/pip freeze > requirements.txt
+packages: pip venv requirements.txt
+	venv/bin/pip install -r requirements.txt
 
 test:
 	python impl_test.py
