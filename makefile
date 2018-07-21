@@ -20,4 +20,4 @@ packages: pip venv requirements.txt
 	venv/bin/pip install -r requirements.txt
 
 test:
-	python impl_test.py
+	venv/bin/python impl_test.py
