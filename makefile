@@ -14,7 +14,7 @@ run: $(SERVER_DEPS)
 	venv/bin/python run.py
 
 pip:
-	python get-pip.py
+	venv/bin/python get-pip.py
 
 packages: pip venv requirements.txt
 	venv/bin/pip install -r requirements.txt
