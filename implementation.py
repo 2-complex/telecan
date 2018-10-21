@@ -108,6 +108,15 @@ class Implementation:
 
     def rounds(self, criteria):
         game = None
+        if criteria.has_key("game_id") and criteria.has_key("user_id"):
+            game_id = criteria["game_id"]
+            user_id = criteria["user_id"]
+
+            rounds = self.models.Round.query.filter_by(game_id=game_id).intersect(
+                self.models.Round.query.filter(self.models.Round.players.any(id=user_id)))
+
+            return json.dumps({"rounds":map(round_info, rounds)})
+
         if criteria.has_key("game_id"):
             rounds = self.models.Round.query.filter_by(game_id=criteria["game_id"])
             return json.dumps({"rounds":map(round_info, rounds)})
