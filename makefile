@@ -13,7 +13,7 @@ run: $(SERVER_DEPS)
 	venv/bin/python update_database.py testing.db
 	venv/bin/python run.py
 
-pip:
+pip: venv
 	venv/bin/python get-pip.py
 
 packages: pip venv requirements.txt
