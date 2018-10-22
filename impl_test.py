@@ -10,9 +10,16 @@ if os.path.isfile("temp.db"):
 db = database.Database("sqlite:///temp.db")
 impl = implementation.Implementation(db.models, db.session)
 
+impl.delete_all_rounds()
+
 blob = json.loads(impl.new_user( "Sir Humphrey Applegate", "Jazz123", "humpy@number10.co.uk" ))
 assert(blob['success'] == True)
 humphrey_id = blob['id']
+
+blob = json.loads(impl.user_info( "Sir Humphrey Applegate" ))
+assert(blob['id'] == humphrey_id)
+assert(blob['username'] == "Sir Humphrey Applegate")
+assert(blob['email'] == "humpy@number10.co.uk")
 
 blob = json.loads(impl.new_user( "Sybil Fawlty", "Splendid11", "saucysibs@ft.co.uk" ))
 assert(blob['success'] == True)

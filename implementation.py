@@ -8,8 +8,8 @@ json blobs.
 
 import json
 import sqlalchemy
-import re
 import hashlib
+import re
 
 
 def merge(dictA, dictB):
@@ -91,6 +91,15 @@ class Implementation:
     def users(self):
         users = self.models.User.query.all()
         return json.dumps({"users":map(user_info, users)})
+
+
+    def user_info(self, username):
+        user = self.get_user_by_name(username)
+        return json.dumps({
+            "username":user.username,
+            "id":user.id,
+            "email":user.email,
+        })
 
 
     def games(self, criteria):
@@ -243,6 +252,13 @@ class Implementation:
         self.session.commit()
 
         return json.dumps({"success":True, "id":round.id})
+
+
+    def delete_all_rounds(self):
+        map(self.session.delete, self.models.Round.query.all())
+        map(self.session.delete, self.models.Move.query.all())
+        self.session.commit()
+        return json.dumps({"success" : True, "deleted" : "everything"})
 
 
     def delete_round(self, delete_id):

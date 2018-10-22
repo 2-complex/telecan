@@ -70,6 +70,12 @@ def r_new_user():
         email = request.form['email'])
 
 
+@app.route('/user-info', methods=['GET'])
+def r_user_info():
+    if request.values.has_key("username"):
+        return impl.user_info(request.values["username"])
+
+
 @app.route('/sign-in', methods=['GET'])
 def r_sign_in():
     return impl.sign_in()
