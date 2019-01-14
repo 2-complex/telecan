@@ -7,7 +7,6 @@ json blobs.
 '''
 
 import json
-import sqlalchemy
 import hashlib
 import re
 
@@ -61,15 +60,16 @@ def salt(password):
         + "apples132424").hexdigest()
 
 
-def capitalize(s):
-    return s[0].upper() + s[1:]
-
-
 class Implementation:
 
     def __init__(self, models, session):
         self.models = models
         self.session = session
+
+
+    def get_user_by_login(self, username, password):
+        return self.models.User.query.filter_by(
+            username=username, password=password).first()
 
 
     def get_user_by_name(self, username):
@@ -95,11 +95,22 @@ class Implementation:
 
     def user_info(self, username):
         user = self.get_user_by_name(username)
-        return json.dumps({
-            "username":user.username,
-            "id":user.id,
-            "email":user.email,
-        })
+        if user:
+            return json.dumps({
+                "username":user.username,
+                "id":user.id,
+                "email":user.email,
+            })
+
+        return json.dumps({"success":False, "reason":"User does not exist"})
+
+
+    def sign_in(self, username, password):
+        user = self.get_user_by_login(username, password)
+        if user == None:
+            return json.dumps({"success":False, "reason":"Username and password do not match"})
+
+        return json.dumps({"success":True, "sessionid":"ASDFJKLSEMICOLON"})
 
 
     def games(self, criteria):
@@ -140,8 +151,7 @@ class Implementation:
             moves = self.models.Move.query.filter_by(round_id=criteria["round_id"])
             return json.dumps({"moves":map(move_info, moves)})
 
-        moves = self.models.Move.query.filter_by(round_id=round_id)
-        return json.dumps({"moves":map(move_info, moves)})
+        return json.dumps({"success":False, "reason":"round_id not provided."})
 
 
     def new_user(self, username, password, email):

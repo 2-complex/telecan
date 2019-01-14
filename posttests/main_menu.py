@@ -2,8 +2,8 @@ import requests
 import json
 import random
 
-URL = "http://localhost:5000"
-TTNN_GAME_ID = 8
+URL = "http://2-complex.com/telecan"
+TTNN_GAME_ID = 1
 
 username = raw_input("Who are you? ")
 print("Hello " + username)
@@ -60,6 +60,7 @@ class GameInfo:
             r = requests.get(URL + "/moves",
                 data = {
                     "round_id" : round["id"],
+                    "cursor" : 0,
                 })
 
             moves = r.json()["moves"]
@@ -141,11 +142,5 @@ while True:
         if sc[0] == 'p':
             number = int(sc[1])
             gameInfo.play_round(number)
-
-
-
-
-
-
 
 
