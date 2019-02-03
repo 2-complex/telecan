@@ -14,6 +14,16 @@ blob = json.loads(impl.new_user( "Sir Humphrey Applegate", "Jazz123", "humpy@num
 assert(blob['success'] == True)
 humphrey_id = blob['id']
 
+r = impl.sign_in("Sir Humphrey Applegate", "Jazz123")
+assert(r.success == True)
+assert(len(r.key) > 10)
+assert(len(r.message) > 10)
+
+r = impl.sign_in("Sir Humphrey Applegate", "WrongPassword")
+assert(r.success == False)
+assert(r.key == "")
+assert(len(r.message) > 10)
+
 blob = json.loads(impl.new_user( "Sybil Fawlty", "Splendid11", "saucysibs@ft.co.uk" ))
 assert(blob['success'] == True)
 sybil_id = blob['id']
@@ -149,6 +159,7 @@ blob = json.loads( impl.delete_game(chess_id) )
 assert( list(db.models.Game.query.all()) == [] )
 assert( list(db.models.Round.query.all()) == [] )
 assert( list(db.models.Move.query.all()) == [] )
+
 
 print("PASS")
 

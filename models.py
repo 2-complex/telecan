@@ -5,6 +5,8 @@ from sqlalchemy.orm import relationship, backref
 
 from slugify import slugify
 
+import os, base64
+
 _round_players = Table('players', database.Model.metadata,
     Column('round_id', Integer, ForeignKey('rounds.id')),
     Column('user_id', Integer, ForeignKey('users.id'))
@@ -22,6 +24,22 @@ class User(database.Model):
         self.username = username
         self.password = password
         self.email = email
+
+
+def generate_session_key():
+    return base64.b64encode(os.urandom(200))[:-2]
+
+class Session(database.Model):
+    __tablename__ = 'sessions'
+    id = Column(Integer, primary_key=True)
+    key = Column(String(255), nullable=False, server_default='')
+
+    user = relationship('User', backref=backref('sessions', lazy='dynamic'))
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+    def __init__(self, user):
+        self.user = user
+        self.key = generate_session_key()
 
 
 class Game(database.Model):

@@ -7,8 +7,17 @@ json blobs.
 '''
 
 import json
-import sqlalchemy
 import re
+
+
+class SignInResponse:
+    def __init__(self, success, key, message):
+        self.success = success
+        self.key = key
+        self.message = message
+
+    def __repr__(self):
+        return repr((self.success, self.key, self.message))
 
 
 def merge(dictA, dictB):
@@ -80,6 +89,11 @@ class Implementation:
         return self.models.User.query.filter_by(id=user_id).first()
 
 
+    def get_user_by_username_password(self, username, password):
+        return self.models.User.query.filter_by(
+            username = username, password = password).first()
+
+
     def users(self):
         users = self.models.User.query.all()
         return json.dumps({"users":map(user_info, users)})
@@ -130,6 +144,18 @@ class Implementation:
         self.session.add(user)
         self.session.commit()
         return json.dumps({"success":True, "id":user.id})
+
+
+    def sign_in(self, username, password):
+        user = self.get_user_by_username_password(username, password)
+
+        if user == None:
+            return SignInResponse(False, "", "User not found.")
+
+        session = self.models.Session(user)
+        self.session.add(session)
+        self.session.commit()
+        return SignInResponse(True, session.key, "Sign in successful.")
 
 
     def delete_user(self, delete_id):

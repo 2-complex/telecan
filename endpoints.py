@@ -5,6 +5,7 @@ then appeal immediately to implentation to do the work.
 
 from flask import render_template
 from flask import request
+from flask import make_response
 from server import app
 
 import implementation
@@ -37,7 +38,6 @@ def r_games():
     if request.values.has_key("username"):
         criteria["username"] = request.values["username"]
 
-    print(criteria)
     return impl.games(criteria)
 
 
@@ -63,9 +63,17 @@ def r_new_user():
         email = request.form['email'])
 
 
-@app.route('/sign-in', methods=['GET'])
+@app.route('/sign-in', methods=['POST'])
 def r_sign_in():
-    return impl.sign_in()
+    r = impl.sign_in(
+        username = request.form['username'],
+        password = request.form['password'])
+    if r.success:
+        resp = make_response(r.message)
+        resp.set_cookie('.SECURITY', r.key)
+    else:
+        resp = make_response(r.message)
+    return resp
 
 
 @app.route('/delete-user', methods=['POST'])
