@@ -76,8 +76,8 @@ class Round(database.Model):
     user_id = Column(Integer, ForeignKey('users.id'))
 
     players = relationship("User",
-            secondary = _round_players,
-            backref = "current_rounds")
+        secondary = _round_players,
+        backref = "current_rounds")
 
     def __init__(self, user, game):
         self.user = user

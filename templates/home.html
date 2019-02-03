@@ -6,18 +6,92 @@
     <h1>Telecan</h1>
 </div>
 
-<div id="games" class="game-list"></div>
+<div id="games" class="tc-games"></div>
 
 <script>
 
-function populateRounds(roundInfo, $rounds)
+function populateMoves(movesInfo, $moves)
 {
-    if( roundInfo.rounds )
+    if( movesInfo.moves )
     {
-        for( var i = 0; i < roundInfo.rounds.length; ++i )
+        for( var i = 0; i < movesInfo.moves.length; ++i )
         {
-            var round = roundInfo.rounds[i];
-            $rounds.append(round.id);
+            var moveInfo = movesInfo.moves[i];
+            var $move = $("<div>");
+            var $content = $("<div>");
+            $content.text(moveInfo.content);
+            $move.append($content);
+            $moves.append($move);
+        }
+    }
+}
+
+function fetchRoundMoves(round_id, $moves)
+{
+    $.when( $.ajax({
+        type: "GET",
+        url: "/moves",
+        dataType: "text",
+        data: {"round_id":round_id,},
+    })).then(
+        function(result)
+        {
+            populateMoves(JSON.parse(result), $moves);
+        }
+    ).fail(
+        function()
+        {
+           $moves.append("Moves not found");
+        }
+    );
+}
+
+function connectRoundClickHandler($round, roundId, $link)
+{
+    $link.addClass("tc-expander");
+    $link.click(
+        function(evt)
+        {
+            if( $round.hasClass("tc-expanded") )
+            {
+                $round.find(".tc-moves").remove();
+                $round.removeClass("tc-expanded")
+            }
+            else
+            {
+                var $moves = $("<div>").addClass("tc-moves");
+                $round.append($moves);
+                fetchRoundMoves(roundId, $moves);
+                $round.addClass("tc-expanded")
+            }
+        }
+    );
+}
+
+function populateRounds(roundsInfo, $rounds)
+{
+    if( roundsInfo.rounds )
+    {
+        for( var i = 0; i < roundsInfo.rounds.length; ++i )
+        {
+            var roundInfo = roundsInfo.rounds[i];
+            var $round = $("<div>");
+            var $idspan = $("<span>").addClass("tc-section-title");
+            $idspan.text(roundInfo.id);
+            var $title = $("<div>");
+            $title.append($idspan);
+            $round.append($title);
+
+            for( var i = 0; i < roundInfo.players.length; ++i )
+            {
+                var $namespan = $("<span>");
+                $namespan.addClass("tc-section-title");
+                $namespan.text(roundInfo.players[i].username);
+                $title.append($namespan);
+            }
+            $rounds.append($round);
+
+            connectRoundClickHandler($round, roundInfo.id, $title);
         }
     }
 }
@@ -34,32 +108,54 @@ function fetchGameRounds(game_id, $rounds)
         {
             populateRounds(
                 JSON.parse(result),
-                $("#games").append($("<div>"))
+                $rounds
             );
         }
     ).fail(
         function()
         {
-           $("#games").append("Rounds not found");
+           $rounds.append("Rounds not found");
         }
     );
 }
 
-function populateGames(gameInfo)
+function connectGameClickHandler($game, gameId, $link)
 {
-    if( gameInfo.games )
-    {
-        for( var i = 0; i < gameInfo.games.length; ++i )
+    $link.addClass("tc-expander");
+    $link.click(
+        function(evt)
         {
-            var game = gameInfo.games[i];
-            $("#games").append(
-                $("<div>").append( game.title ).click(
-                    function(evt)
-                    {
-                        fetchGameRounds(game.id);
-                    }
-                )
-            );
+            if( $game.hasClass("tc-expanded") )
+            {
+                $game.find(".tc-rounds").remove();
+                $game.removeClass("tc-expanded");
+            }
+            else
+            {
+                var $rounds = $("<div>").addClass("tc-rounds");
+                $game.append($rounds);
+                fetchGameRounds(gameId, $rounds);
+                $game.addClass("tc-expanded");
+            }
+        }
+    );
+}
+
+function populateGames(gamesInfo)
+{
+    if( gamesInfo.games )
+    {
+        for( var i = 0; i < gamesInfo.games.length; ++i )
+        {
+            var gameInfo = gamesInfo.games[i];
+            var $game = $("<div>");
+            var $title = $("<span>");
+            $title.addClass("tc-section-title")
+            $title.text(gameInfo.title);
+            $game.append( $title );
+            $("#games").append($game);
+
+            connectGameClickHandler($game, gameInfo.id, $title);
         }
     }
 }
@@ -74,7 +170,7 @@ function fetchGames()
     })).then(
         function(result)
         {
-            populateGames(JSON.parse(result))
+            populateGames(JSON.parse(result));
         }
     ).fail(
         function()

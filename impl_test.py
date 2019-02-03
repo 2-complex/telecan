@@ -10,9 +10,16 @@ if os.path.isfile("temp.db"):
 db = database.Database("sqlite:///temp.db")
 impl = implementation.Implementation(db.models, db.session)
 
+impl.delete_all_rounds()
+
 blob = json.loads(impl.new_user( "Sir Humphrey Applegate", "Jazz123", "humpy@number10.co.uk" ))
 assert(blob['success'] == True)
 humphrey_id = blob['id']
+
+blob = json.loads(impl.user_info( "Sir Humphrey Applegate" ))
+assert(blob['id'] == humphrey_id)
+assert(blob['username'] == "Sir Humphrey Applegate")
+assert(blob['email'] == "humpy@number10.co.uk")
 
 r = impl.sign_in("Sir Humphrey Applegate", "Jazz123")
 assert(r.success == True)
@@ -80,6 +87,9 @@ blob = json.loads( impl.new_game(humphrey_id, "Chess", "A Musical from the 80s")
 assert(blob['success'] == True)
 chess_id = blob['id']
 
+blob = json.loads( impl.new_game(humphrey_id, "Chess", "A DIFFERENT Musical with the same name from the 80s") )
+assert(blob['success'] == False)
+
 blob = json.loads( impl.games({"username":"Sir Humphrey Applegate"}) )
 assert(len(blob['games']) == 1)
 assert(blob['games'][0]['title'] == u"Chess")
@@ -141,7 +151,7 @@ assert(blob['success'] == True)
 blob = json.loads( impl.new_move(chess_round_id, sybil_id, "You sunk my battleship") )
 assert(blob['success'] == True)
 
-blob = json.loads( impl.moves(chess_round_id) )
+blob = json.loads( impl.moves({"round_id":chess_round_id}) )
 assert( blob['moves'][0]['content'] == "Knight to C3" )
 assert( blob['moves'][1]['content'] == "Pawn to J4" )
 assert( blob['moves'][2]['content'] == "You sunk my battleship" )

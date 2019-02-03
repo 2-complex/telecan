@@ -7,6 +7,7 @@ json blobs.
 '''
 
 import json
+import hashlib
 import re
 
 
@@ -38,12 +39,17 @@ def get_id(obj):
     return obj.id
 
 
+def get_name(obj):
+    return obj.name
+
+
 def round_info(round):
     return {
         "id":round.id,
         "game_id":round.game_id,
         "user_id":round.user_id,
-        "players":map(get_id, round.players)}
+        "players":map(user_info, round.players)
+    }
 
 
 def move_info(move):
@@ -58,12 +64,10 @@ def valid_username(username):
     return username == username.strip() and None != re.match("[a-zA-Z0-9 _-]+", username)
 
 
-def get_token_for_user(user):
-    return hashlib.sha512(user.password).hexdigest()
-
-
-def capitalize(s):
-    return s[0].upper() + s[1:]
+def salt(password):
+    return hashlib.sha256("bananas1312"
+        + password
+        + "apples132424").hexdigest()
 
 
 class Implementation:
@@ -71,6 +75,11 @@ class Implementation:
     def __init__(self, models, session):
         self.models = models
         self.session = session
+
+
+    def get_user_by_login(self, username, password):
+        return self.models.User.query.filter_by(
+            username=username, password=password).first()
 
 
     def get_user_by_name(self, username):
@@ -99,6 +108,26 @@ class Implementation:
         return json.dumps({"users":map(user_info, users)})
 
 
+    def user_info(self, username):
+        user = self.get_user_by_name(username)
+        if user:
+            return json.dumps({
+                "username":user.username,
+                "id":user.id,
+                "email":user.email,
+            })
+
+        return json.dumps({"success":False, "reason":"User does not exist"})
+
+
+    def sign_in(self, username, password):
+        user = self.get_user_by_login(username, password)
+        if user == None:
+            return json.dumps({"success":False, "reason":"Username and password do not match"})
+
+        return json.dumps({"success":True, "sessionid":"ASDFJKLSEMICOLON"})
+
+
     def games(self, criteria):
         user = None
         if criteria.has_key("username"):
@@ -114,6 +143,15 @@ class Implementation:
 
     def rounds(self, criteria):
         game = None
+        if criteria.has_key("game_id") and criteria.has_key("user_id"):
+            game_id = criteria["game_id"]
+            user_id = criteria["user_id"]
+
+            rounds = self.models.Round.query.filter_by(game_id=game_id).intersect(
+                self.models.Round.query.filter(self.models.Round.players.any(id=user_id)))
+
+            return json.dumps({"rounds":map(round_info, rounds)})
+
         if criteria.has_key("game_id"):
             rounds = self.models.Round.query.filter_by(game_id=criteria["game_id"])
             return json.dumps({"rounds":map(round_info, rounds)})
@@ -122,9 +160,13 @@ class Implementation:
         return json.dumps({"rounds":map(round_info, rounds)})
 
 
-    def moves(self, round_id):
-        moves = self.models.Move.query.filter_by(round_id=round_id)
-        return json.dumps({"moves":map(move_info, moves)})
+    def moves(self, criteria):
+        round = None
+        if criteria.has_key("round_id"):
+            moves = self.models.Move.query.filter_by(round_id=criteria["round_id"])
+            return json.dumps({"moves":map(move_info, moves)})
+
+        return json.dumps({"success":False, "reason":"round_id not provided."})
 
 
     def new_user(self, username, password, email):
@@ -140,7 +182,7 @@ class Implementation:
         if not valid_email(email):
             return json.dumps({"success":False, "reason":"Email address not in the form of an email address."})
 
-        user = self.models.User(username, password, email)
+        user = self.models.User(username, salt(password), email)
         self.session.add(user)
         self.session.commit()
         return json.dumps({"success":True, "id":user.id})
@@ -176,6 +218,9 @@ class Implementation:
 
         if user == None:
             return json.dumps({"success":False, "reason":"User not found."})
+
+        if len(list(self.models.Game.query.filter_by(user=user, title=title))) > 0:
+            return json.dumps({"success":False, "reason":"Duplicate game name " + str(title)})
 
         game = self.models.Game(user, title, description)
         self.session.add(game)
@@ -244,6 +289,13 @@ class Implementation:
         self.session.commit()
 
         return json.dumps({"success":True, "id":round.id})
+
+
+    def delete_all_rounds(self):
+        map(self.session.delete, self.models.Round.query.all())
+        map(self.session.delete, self.models.Move.query.all())
+        self.session.commit()
+        return json.dumps({"success" : True, "deleted" : "everything"})
 
 
     def delete_round(self, delete_id):
