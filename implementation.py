@@ -70,6 +70,10 @@ def salt(password):
         + "apples132424").hexdigest()
 
 
+def capitalize(s):
+    return s[0].upper() + s[1:]
+
+
 class Implementation:
 
     def __init__(self, models, session):
@@ -100,7 +104,7 @@ class Implementation:
 
     def get_user_by_username_password(self, username, password):
         return self.models.User.query.filter_by(
-            username = username, password = password).first()
+            username = username, password=salt(password)).first()
 
 
     def users(self):
@@ -118,14 +122,6 @@ class Implementation:
             })
 
         return json.dumps({"success":False, "reason":"User does not exist"})
-
-
-    def sign_in(self, username, password):
-        user = self.get_user_by_login(username, password)
-        if user == None:
-            return json.dumps({"success":False, "reason":"Username and password do not match"})
-
-        return json.dumps({"success":True, "sessionid":"ASDFJKLSEMICOLON"})
 
 
     def games(self, criteria):

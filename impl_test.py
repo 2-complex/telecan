@@ -22,12 +22,12 @@ assert(blob['username'] == "Sir Humphrey Applegate")
 assert(blob['email'] == "humpy@number10.co.uk")
 
 r = impl.sign_in("Sir Humphrey Applegate", "Jazz123")
-assert(r.success == True)
+assert(r.success)
 assert(len(r.key) > 10)
 assert(len(r.message) > 10)
 
 r = impl.sign_in("Sir Humphrey Applegate", "WrongPassword")
-assert(r.success == False)
+assert(not r.success)
 assert(r.key == "")
 assert(len(r.message) > 10)
 

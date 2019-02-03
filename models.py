@@ -29,10 +29,11 @@ class User(database.Model):
 def generate_session_key():
     return base64.b64encode(os.urandom(200))[:-2]
 
+
 class Session(database.Model):
     __tablename__ = 'sessions'
     id = Column(Integer, primary_key=True)
-    key = Column(String(255), nullable=False, server_default='')
+    key = Column(String(200), nullable=False, server_default='')
 
     user = relationship('User', backref=backref('sessions', lazy='dynamic'))
     user_id = Column(Integer, ForeignKey('users.id'))

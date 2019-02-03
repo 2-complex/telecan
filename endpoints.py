@@ -81,11 +81,15 @@ def sign_in():
     if request.values.has_key("username"):
         username = request.values["username"]
 
-    if username!=None and password!=None:
-        print repr(username)
-        print repr(password)
-
-        return impl.sign_in(username, password)
+    r = impl.sign_in(
+        username = request.form['username'],
+        password = request.form['password'])
+    if r.success:
+        resp = make_response(r.message)
+        resp.set_cookie('.SECURITY', r.key)
+    else:
+        resp = make_response(r.message)
+    return resp
 
     abort(404)
 
