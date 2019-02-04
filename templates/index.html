@@ -12,7 +12,7 @@
 <div id="moves" class="move-list"></div>
 
 <div class="panel" id="new-user-form">
-    Name
+    Username
     <div>
         <textarea id="new-username" class="form-input"></textarea>
     </div>
@@ -26,6 +26,20 @@
     </div>
     <div>
         <button id="new-user-button">NEW USER</button>
+    </div>
+</div>
+
+<div class="panel" id="sign-in-form">
+    Username
+    <div>
+        <textarea id="sign-in-username" class="form-input"></textarea>
+    </div>
+    Password
+    <div>
+        <textarea id="sign-in-password" class="form-input"></textarea>
+    </div>
+    <div>
+        <button id="sign-in-button">SIGN IN</button>
     </div>
 </div>
 
@@ -146,6 +160,26 @@ $('#new-user-button').click(
                 "username":$("#new-username").val(),
                 "password":$("#new-password").val(),
                 "email":$("#new-email").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#sign-in-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/sign-in", dataType: "text",
+            data: {
+                "username":$("#sign-in-username").val(),
+                "password":$("#sign-in-password").val(),
             },
         }) ).then(
             function(result)

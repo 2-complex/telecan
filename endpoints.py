@@ -85,10 +85,12 @@ def sign_in():
         username = request.form['username'],
         password = request.form['password'])
     if r.success:
-        resp = make_response(r.message)
+        print("SUCCESSFUL LOGIN")
+        resp = make_response(r.blob)
         resp.set_cookie('.SECURITY', r.key)
     else:
-        resp = make_response(r.message)
+        print("UNSUCCESSFUL")
+        resp = make_response(r.blob)
     return resp
 
     abort(404)
@@ -138,11 +140,10 @@ app.add_url_rule('/rounds', 'rounds', rounds, methods=['GET'])
 app.add_url_rule('/moves', 'moves', moves, methods=['GET'])
 app.add_url_rule('/new-user', "new-user", new_user, methods=['POST'])
 app.add_url_rule('/user-info', "user-info", user_info, methods=['GET'])
-app.add_url_rule('/sign-in', "sign-in", sign_in, methods=['GET'])
+app.add_url_rule('/sign-in', "sign-in", sign_in, methods=['POST'])
 app.add_url_rule('/delete-user', "delete-user", delete_user, methods=['POST'])
 app.add_url_rule('/new-game', "new-game", new_game, methods=['POST'])
 app.add_url_rule('/delete-game', "delete-game", delete_game, methods=['POST'])
 app.add_url_rule('/new-round', "new-round", new_round, methods=['POST'])
 app.add_url_rule('/delete-round', "delete-round", delete_round, methods=['POST'])
 app.add_url_rule('/new-move', "new-move", new_move, methods=['POST'])
-

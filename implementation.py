@@ -12,10 +12,10 @@ import re
 
 
 class SignInResponse:
-    def __init__(self, success, key, message):
+    def __init__(self, success, key, blob):
         self.success = success
         self.key = key
-        self.message = message
+        self.blob = blob
 
     def __repr__(self):
         return repr((self.success, self.key, self.message))
@@ -188,12 +188,18 @@ class Implementation:
         user = self.get_user_by_username_password(username, password)
 
         if user == None:
-            return SignInResponse(False, "", "User not found.")
+            return SignInResponse(False, "", json.dumps({
+                    "success" : False,
+                    "reason" : "User not found.",
+                }))
 
         session = self.models.Session(user)
         self.session.add(session)
         self.session.commit()
-        return SignInResponse(True, session.key, "Sign in successful.")
+        return SignInResponse(True, session.key, json.dumps({
+                "success" : True,
+                "user_id" : user.id,
+            }))
 
 
     def delete_user(self, delete_id):
