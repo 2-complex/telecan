@@ -75,10 +75,10 @@ def capitalize(s):
 
 
 class Implementation:
-
     def __init__(self, models, session, key):
         self.models = models
         self.session = session
+        self.key = key
 
         user_session = self.models.Session.query.filter_by(key = key).first()
         if user_session:
@@ -219,8 +219,23 @@ class Implementation:
             }))
 
 
+    def sign_out(self):
+        matching = self.models.Session.query.filter_by(key = self.key)
+        if not len(list(matching)):
+            return json.dumps({"success":False, "reason": "Session not found."})
+        map(self.session.delete, matching)
+        self.session.commit()
+
+        self.key = None
+        self.current_user = None
+
+        return json.dumps({
+            "success" : True,
+        })
+
+
     def delete_user(self, delete_id):
-        if type(delete_id) in [str, unicode] and None == re.match("\d+$", delete_id):
+        if type(delete_id) in [str, unicode] and None == re.match(r"\d+$", delete_id):
             return json.dumps({"success":False, "reason":"User id non-numerical"})
 
         matching = self.models.User.query.filter_by(id=int(delete_id))

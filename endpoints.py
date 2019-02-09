@@ -102,6 +102,10 @@ def sign_in():
     return resp
 
 
+def sign_out():
+    return get_impl().sign_out()
+
+
 def delete_user():
     return get_impl().delete_user(
         delete_id = request.form['id'])
@@ -141,14 +145,15 @@ def new_move():
 app.add_url_rule('/', 'index', index)
 app.add_url_rule('/home/<username>', 'home', home, methods=['GET'])
 
+app.add_url_rule('/sign-in', "sign-in", sign_in, methods=['POST'])
+app.add_url_rule('/sign-out', "sign-out", sign_out, methods=['POST'])
 app.add_url_rule('/users', 'users', users, methods=['GET'])
 app.add_url_rule('/games', 'games', games, methods=['GET'])
 app.add_url_rule('/rounds', 'rounds', rounds, methods=['GET'])
 app.add_url_rule('/moves', 'moves', moves, methods=['GET'])
 app.add_url_rule('/new-user', "new-user", new_user, methods=['POST'])
-app.add_url_rule('/user-info', "user-info", user_info, methods=['GET'])
-app.add_url_rule('/sign-in', "sign-in", sign_in, methods=['POST'])
 app.add_url_rule('/delete-user', "delete-user", delete_user, methods=['POST'])
+app.add_url_rule('/user-info', "user-info", user_info, methods=['GET'])
 app.add_url_rule('/new-game', "new-game", new_game, methods=['POST'])
 app.add_url_rule('/delete-game', "delete-game", delete_game, methods=['POST'])
 app.add_url_rule('/new-round', "new-round", new_round, methods=['POST'])

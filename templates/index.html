@@ -175,18 +175,21 @@ $('#new-user-button').click(
 $('#sign-in-button').click(
     function(evt)
     {
+        var username = $("#sign-in-username").val()
+        var password = $("#sign-in-password").val()
+
         $('#output').empty();
         $.when( $.ajax({ type: "POST", url: "/sign-in", dataType: "text",
             data: {
-                "username":$("#sign-in-username").val(),
-                "password":$("#sign-in-password").val(),
+                "username":username,
+                "password":password,
             },
         }) ).then(
             function(result)
             {
                 var response = JSON.parse(result);
                 $("#output").append(result);
-                refresh();
+                window.location.href = "home/" + username
             }
         );
     }

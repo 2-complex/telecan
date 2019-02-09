@@ -4,7 +4,10 @@
 
 <div id="masthead">
     <h1>Telecan</h1>
+    Hello {{username | safe}}, (<a id="sign-out-button">sign out</a>)
 </div>
+
+
 
 <div id="games" class="tc-games"></div>
 
@@ -182,6 +185,28 @@ function fetchGames()
 
 function refresh()
 {
+    $("#sign-out-button").click(
+        function(evt)
+        {
+            $.when( $.ajax({
+                type: "POST",
+                url: "/sign-out",
+                dataType: "text",
+                data: {},
+            })).then(
+                function(result)
+                {
+                    window.location.href = ""
+                }
+            ).fail(
+                function()
+                {
+                    window.location.href = ""
+                }
+            );
+        }
+    )
+
     $("#games").empty();
     fetchGames();
 }
