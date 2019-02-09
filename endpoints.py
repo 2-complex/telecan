@@ -16,7 +16,6 @@ db = database.Database("sqlite:///testing.db")
 impl = implementation.Implementation(db.models, db.session)
 
 
-
 def index():
     return render_template('index.html')
 
@@ -84,16 +83,10 @@ def sign_in():
     r = impl.sign_in(
         username = request.form['username'],
         password = request.form['password'])
+    resp = make_response(r.blob)
     if r.success:
-        print("SUCCESSFUL LOGIN")
-        resp = make_response(r.blob)
         resp.set_cookie('.SECURITY', r.key)
-    else:
-        print("UNSUCCESSFUL")
-        resp = make_response(r.blob)
     return resp
-
-    abort(404)
 
 
 def delete_user():
