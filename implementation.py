@@ -76,9 +76,15 @@ def capitalize(s):
 
 class Implementation:
 
-    def __init__(self, models, session):
+    def __init__(self, models, session, key):
         self.models = models
         self.session = session
+
+        user_session = self.models.Session.query.filter_by(key = key).first()
+        if user_session:
+            self.current_user = user_session.user
+        else:
+            self.current_user = None
 
 
     def get_user_by_login(self, username, password):
@@ -105,6 +111,15 @@ class Implementation:
     def get_user_by_username_password(self, username, password):
         return self.models.User.query.filter_by(
             username = username, password=salt(password)).first()
+
+
+    def is_signed_in(self):
+        return self.current_user != None
+
+    def get_username(self):
+        if self.is_signed_in():
+            return self.current_user.username
+        return None
 
 
     def users(self):
@@ -186,6 +201,8 @@ class Implementation:
 
     def sign_in(self, username, password):
         user = self.get_user_by_username_password(username, password)
+
+        print("sign in sees user = " + str(user))
 
         if user == None:
             return SignInResponse(False, "", json.dumps({
