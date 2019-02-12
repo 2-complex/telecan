@@ -10,7 +10,6 @@ import json
 import hashlib
 import re
 
-
 class SignInResponse:
     def __init__(self, success, key, blob):
         self.success = success

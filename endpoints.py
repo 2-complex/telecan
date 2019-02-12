@@ -8,13 +8,11 @@ from flask import request
 from flask import redirect
 from flask import make_response
 from flask import abort
-from server import app
 
 import implementation
 import database
 
 db = database.Database("sqlite:///testing.db")
-
 
 def get_impl():
     return implementation.Implementation(
@@ -142,20 +140,23 @@ def new_move():
         content = request.form['content'])
 
 
-app.add_url_rule('/', 'index', index)
-app.add_url_rule('/home/<username>', 'home', home, methods=['GET'])
+def assign_to_app(app):
+    app.add_url_rule('/', 'index', index)
+    app.add_url_rule('/home/<username>', 'home', home, methods=['GET'])
 
-app.add_url_rule('/sign-in', "sign-in", sign_in, methods=['POST'])
-app.add_url_rule('/sign-out', "sign-out", sign_out, methods=['POST'])
-app.add_url_rule('/users', 'users', users, methods=['GET'])
-app.add_url_rule('/games', 'games', games, methods=['GET'])
-app.add_url_rule('/rounds', 'rounds', rounds, methods=['GET'])
-app.add_url_rule('/moves', 'moves', moves, methods=['GET'])
-app.add_url_rule('/new-user', "new-user", new_user, methods=['POST'])
-app.add_url_rule('/delete-user', "delete-user", delete_user, methods=['POST'])
-app.add_url_rule('/user-info', "user-info", user_info, methods=['GET'])
-app.add_url_rule('/new-game', "new-game", new_game, methods=['POST'])
-app.add_url_rule('/delete-game', "delete-game", delete_game, methods=['POST'])
-app.add_url_rule('/new-round', "new-round", new_round, methods=['POST'])
-app.add_url_rule('/delete-round', "delete-round", delete_round, methods=['POST'])
-app.add_url_rule('/new-move', "new-move", new_move, methods=['POST'])
+    app.add_url_rule('/sign-in', "sign-in", sign_in, methods=['POST'])
+    app.add_url_rule('/sign-out', "sign-out", sign_out, methods=['POST'])
+
+    app.add_url_rule('/users', 'users', users, methods=['GET'])
+    app.add_url_rule('/games', 'games', games, methods=['GET'])
+    app.add_url_rule('/rounds', 'rounds', rounds, methods=['GET'])
+    app.add_url_rule('/moves', 'moves', moves, methods=['GET'])
+    app.add_url_rule('/new-user', "new-user", new_user, methods=['POST'])
+    app.add_url_rule('/delete-user', "delete-user", delete_user, methods=['POST'])
+    app.add_url_rule('/user-info', "user-info", user_info, methods=['GET'])
+    app.add_url_rule('/new-game', "new-game", new_game, methods=['POST'])
+    app.add_url_rule('/delete-game', "delete-game", delete_game, methods=['POST'])
+    app.add_url_rule('/new-round', "new-round", new_round, methods=['POST'])
+    app.add_url_rule('/delete-round', "delete-round", delete_round, methods=['POST'])
+    app.add_url_rule('/new-move', "new-move", new_move, methods=['POST'])
+
