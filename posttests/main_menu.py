@@ -2,7 +2,7 @@ import requests
 import json
 import random
 
-URL = "http://2-complex.com/telecan"
+URL = "http://localhost:5000"
 TTNN_GAME_ID = 1
 
 username = raw_input("Who are you? ")
