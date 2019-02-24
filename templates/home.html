@@ -186,6 +186,7 @@ function makeGame(gameInfo)
     $game.append( $title );
     $game.append( $deleteButton );
     $deleteButton.text("(delete)");
+    $deleteButton.addClass("tc-link");
     $("#games").append($game);
 
     $deleteButton.click(
