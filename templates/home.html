@@ -23,16 +23,6 @@
     </div>
 </div>
 
-<div class="panel" id="delete-game-form">
-    Game id
-    <div>
-        <textarea id="delete-game-id" class="form-input"></textarea>
-    </div>
-    <div>
-        <button id="delete-game-button">DELETE GAME</button>
-    </div>
-</div>
-
 <script>
 
 $('#new-game-button').click(
@@ -43,25 +33,6 @@ $('#new-game-button').click(
             data: {
                 "title":$("#new-game-title").val(),
                 "description":$("#new-game-description").val(),
-            },
-        }) ).then(
-            function(result)
-            {
-                var response = JSON.parse(result);
-                $("#output").append(result);
-                refresh();
-            }
-        );
-    }
-)
-
-$('#delete-game-button').click(
-    function(evt)
-    {
-        $('#output').empty();
-        $.when( $.ajax({ type: "POST", url: "/delete-game", dataType: "text",
-            data: {
-                "id":$("#delete-game-id").val(),
             },
         }) ).then(
             function(result)
@@ -205,21 +176,45 @@ function connectGameClickHandler($game, gameId, $link)
     );
 }
 
+function makeGame(gameInfo)
+{
+    var $game = $("<div>");
+    var $title = $("<span>");
+    var $deleteButton = $("<span>")
+    $title.addClass("tc-section-title")
+    $title.text(gameInfo.title);
+    $game.append( $title );
+    $game.append( $deleteButton );
+    $deleteButton.text("(delete)");
+    $("#games").append($game);
+
+    $deleteButton.click(
+        function(evt)
+        {
+            $('#output').empty();
+            $.when( $.ajax({ type: "POST", url: "/delete-game", dataType: "text",
+                data: {
+                    "id":gameInfo.id,
+                },
+            }) ).then(
+                function(result)
+                {
+                    refresh();
+                }
+            );
+        }
+    )
+
+    connectGameClickHandler($game, gameInfo.id, $title);
+}
+
 function populateGames(gamesInfo)
 {
     if( gamesInfo.games )
     {
         for( var i = 0; i < gamesInfo.games.length; ++i )
         {
-            var gameInfo = gamesInfo.games[i];
-            var $game = $("<div>");
-            var $title = $("<span>");
-            $title.addClass("tc-section-title")
-            $title.text(gameInfo.title);
-            $game.append( $title );
-            $("#games").append($game);
-
-            connectGameClickHandler($game, gameInfo.id, $title);
+            makeGame(gamesInfo.games[i]);
         }
     }
 }
