@@ -111,7 +111,6 @@ def delete_user():
 
 def new_game():
     return get_impl().new_game(
-        user_id = request.form['user_id'],
         title = request.form['title'],
         description = request.form['description'])
 

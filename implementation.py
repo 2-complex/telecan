@@ -86,11 +86,6 @@ class Implementation:
             self.current_user = None
 
 
-    def get_user_by_login(self, username, password):
-        return self.models.User.query.filter_by(
-            username=username, password=password).first()
-
-
     def get_user_by_name(self, username):
         return self.models.User.query.filter_by(username=username).first()
 
@@ -114,6 +109,7 @@ class Implementation:
 
     def is_signed_in(self):
         return self.current_user != None
+
 
     def get_username(self):
         if self.is_signed_in():
@@ -246,16 +242,14 @@ class Implementation:
         return json.dumps({"success":True, "deleted":deleted_ids})
 
 
-    def new_game(self, user_id, title, description):
-        user = self.get_user_by_id(user_id)
+    def new_game(self, title, description):
+        if self.current_user == None:
+            return json.dumps({"success":False, "reason":"No."})
 
-        if user == None:
-            return json.dumps({"success":False, "reason":"User not found."})
-
-        if len(list(self.models.Game.query.filter_by(user=user, title=title))) > 0:
+        if len(list(self.models.Game.query.filter_by(user=self.current_user, title=title))) > 0:
             return json.dumps({"success":False, "reason":"Duplicate game name " + str(title)})
 
-        game = self.models.Game(user, title, description)
+        game = self.models.Game(self.current_user, title, description)
         self.session.add(game)
         self.session.commit()
         return json.dumps({"success":True, "id":game.id})

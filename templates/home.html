@@ -9,21 +9,7 @@
 
 <div id="games" class="tc-games"></div>
 
-<div class="panel" id="delete-user">
-    User id
-    <div>
-        <textarea id="delete-user-id" class="form-input"></textarea>
-    </div>
-    <div>
-        <button id="delete-user-button">DELETE</button>
-    </div>
-</div>
-
 <div class="panel" id="new-game-form">
-    User (owner)
-    <div>
-        <textarea id="new-game-user" class="form-input"></textarea>
-    </div>
     Title
     <div>
         <textarea id="new-game-title" class="form-input"></textarea>
@@ -47,54 +33,46 @@
     </div>
 </div>
 
-<div class="panel" id="new-round-form">
-    New Round of game:
-    <div>
-        <textarea id="new-round-game" class="form-input"></textarea>
-    </div>
-    User (owner)
-    <div>
-        <textarea id="new-round-user" class="form-input"></textarea>
-    </div>
-    Players
-    <div>
-        <textarea id="new-round-players" class="form-input"></textarea>
-    </div>
-    <div>
-        <button id="new-round-button">NEW ROUND</button>
-    </div>
-</div>
-
-<div class="panel" id="delete-round-form">
-    Round id
-    <div>
-        <textarea id="delete-round-id" class="form-input"></textarea>
-    </div>
-    <div>
-        <button id="delete-round-button">DELETE ROUND</button>
-    </div>
-</div>
-
-<div class="panel" id="new-move-form">
-    New Move in round:
-    <div>
-        <textarea id="new-move-round" class="form-input"></textarea>
-    </div>
-    User (owner)
-    <div>
-        <textarea id="new-move-user" class="form-input"></textarea>
-    </div>
-    Content
-    <div>
-        <textarea id="new-move-content" class="form-input"></textarea>
-    </div>
-    <div>
-        <button id="new-move-button">NEW MOVE</button>
-    </div>
-</div>
-
-
 <script>
+
+$('#new-game-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/new-game", dataType: "text",
+            data: {
+                "title":$("#new-game-title").val(),
+                "description":$("#new-game-description").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
+
+$('#delete-game-button').click(
+    function(evt)
+    {
+        $('#output').empty();
+        $.when( $.ajax({ type: "POST", url: "/delete-game", dataType: "text",
+            data: {
+                "id":$("#delete-game-id").val(),
+            },
+        }) ).then(
+            function(result)
+            {
+                var response = JSON.parse(result);
+                $("#output").append(result);
+                refresh();
+            }
+        );
+    }
+)
 
 function populateMoves(movesInfo, $moves)
 {

@@ -47,26 +47,6 @@
 
 
 <script>
-function refresh()
-{
-    var thingsList = ["users", "games"];
-    for( var i = 0; i < thingsList.length; i++ )
-    {
-        var things = thingsList[i];
-
-        $("#"+things).empty();
-        $.when( $.ajax({ type: "GET", url: "/"+things, dataType: "text"}) )
-            .then(
-                function(result) {
-                    var response = JSON.parse(result);
-                    $("#"+things).append(result);
-                }
-            );
-    }
-}
-
-$( document ).ready(refresh);
-
 $('#new-user-button').click(
     function(evt)
     {
@@ -124,28 +104,6 @@ $('#delete-user-button').click(
             {
                 var response = JSON.parse(result);
                 $("#output").append(result);
-                refresh();
-            }
-        );
-    }
-)
-
-$('#new-game-button').click(
-    function(evt)
-    {
-        $('#output').empty();
-        $.when( $.ajax({ type: "POST", url: "/new-game", dataType: "text",
-            data: {
-                "user_id":$("#new-game-user").val(),
-                "title":$("#new-game-title").val(),
-                "description":$("#new-game-description").val(),
-            },
-        }) ).then(
-            function(result)
-            {
-                var response = JSON.parse(result);
-                $("#output").append(result);
-                refresh();
             }
         );
     }
@@ -164,7 +122,6 @@ $('#delete-game-button').click(
             {
                 var response = JSON.parse(result);
                 $("#output").append(result);
-                refresh();
             }
         );
     }
